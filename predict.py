@@ -6,6 +6,8 @@ from backend.consts import ModelSize
 from backend.dalle_model import DalleModel
 import typing
 import time
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 dalle_model = None
 class Predictor(BasePredictor):
