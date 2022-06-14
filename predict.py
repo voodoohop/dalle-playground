@@ -27,7 +27,8 @@ class Predictor(BasePredictor):
 
         start_time = time.time()
         print("Loading Model")
-        self.model = DalleModel(ModelSize[model_size])
+        dalle_version = ModelSize[model_size]
+        self.model = DalleModel(dalle_version)
         print("Generating Images")
         generated_imgs = self.model.generate_images(prompt, num)
         for img in generated_imgs:
