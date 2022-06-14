@@ -57,7 +57,7 @@ class DalleModel:
             dalle_model = DALLE_MODEL_MINI
             dtype = jnp.float32
             
-            
+        print ("load dalle")
         # Load dalle-mini
         self.model, params = DalleBart.from_pretrained(
             dalle_model, revision=DALLE_COMMIT_ID, dtype=dtype, _do_init=False
