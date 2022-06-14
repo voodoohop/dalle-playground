@@ -12,18 +12,19 @@ class Predictor(BasePredictor):
     def setup(self):
         """Load the model into memory to make running multiple predictions efficient"""
         dalle_version = ModelSize.MINI
-        self.model = DalleModel(dalle_version)
-        print("setup complete")
+        # self.model = DalleModel(dalle_version)
+        print("No setup")
 
 
     def predict(self,
                 prompt: str = Input(description="Image prompt"),
-                num: int = Input(description="Number of images to generate", default=1)
+                num: int = Input(description="Number of images to generate", default=1),
+                model_size: str = Input(description="Size of the model", default=ModelSize.MINI, choices=[ModelSize.MINI,ModelSize.MEGA,ModelSize.MEGA_FULL])
                 ) -> typing.Iterator[Path]:
         """Run a single prediction on the model"""
         import time
         start_time = time.time()
-
+        self.model = DalleModel(model_size)
         print("generating images")
         generated_imgs = self.model.generate_images(prompt, num)
         image = None
