@@ -20,22 +20,14 @@ class Predictor(BasePredictor):
 
     def predict(self,
                 prompt: str = Input(description="Image prompt"),
-                num: int = Input(description="Number of images to generate", default=1),
+                num: int = Input(description="Number of images to generate", default=1, ge=0,le=20),
                 model_size: str = Input(description="Size of the model", default="MINI", choices=["MINI", "MEGA", "MEGA_FULL"])
                 ) -> typing.List[Path]:
         """Run a single prediction on the model"""
 
         start_time = time.time()
         print("Loading Model")
-        dalle_version = ModelSize.MINI
-        if model_size == 'MINI':
-            dalle_version = ModelSize.MINI
-        if model_size == 'MEGA':
-            dalle_version = ModelSize.MEGA
-        if model_size == 'MEGA_FULL':
-            dalle_version = ModelSize.MEGA_FULL
-
-        self.model = DalleModel(dalle_version)
+        self.model = DalleModel(model_size)
         print("Generating Images")
         generated_imgs = self.model.generate_images(prompt, num)
         for img in generated_imgs:
