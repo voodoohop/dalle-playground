@@ -1,11 +1,11 @@
 from cog import BasePredictor, Path, Input, File
-import sys, os
+import sys
 import uuid
 sys.path.insert(1, './backend')
 from backend.consts import ModelSize
 from backend.dalle_model import DalleModel
-from io import BytesIO
 import typing
+import time
 
 dalle_model = None
 class Predictor(BasePredictor):
@@ -22,14 +22,12 @@ class Predictor(BasePredictor):
                 model_size: str = Input(description="Size of the model", default="MINI", choices=["MINI", "MEGA", "MEGA_FULL"])
                 ) -> typing.Iterator[Path]:
         """Run a single prediction on the model"""
-        import time
+
         start_time = time.time()
-        print("whiny")
-        print(ModelSize[model_size])
+        print("Loading Model")
         self.model = DalleModel(ModelSize[model_size])
-        print("generating images")
+        print("Generating Images")
         generated_imgs = self.model.generate_images(prompt, num)
-        image = None
         for img in generated_imgs:
             img_name = uuid.uuid4()
             img.save(f'{img_name}.png')
