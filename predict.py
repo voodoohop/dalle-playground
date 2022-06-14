@@ -1,5 +1,5 @@
 from cog import BasePredictor, Path, Input, File
-import sys
+import sys, os
 sys.path.insert(1, './backend')
 from backend.consts import ModelSize
 from backend.dalle_model import DalleModel
@@ -12,6 +12,8 @@ class Predictor(BasePredictor):
         """Load the model into memory to make running multiple predictions efficient"""
         dalle_version = ModelSize.MINI
         self.model = DalleModel(dalle_version)
+        print("setup complete")
+
 
     def predict(self,
                 prompt: str = Input(description="Image prompt"),
@@ -19,10 +21,12 @@ class Predictor(BasePredictor):
                 ) -> Path:
         """Run a single prediction on the model"""
         # ... pre-processing ...
+        print("generating images")
         generated_imgs = self.model.generate_images(prompt, num)
         image = None
         for img in generated_imgs:
             buffered = BytesIO()
-            img.save(buffered, format="JPEG")
+            img.save('output.png')
+            print(os.popen("ls").read())
             image = img
-        return File(image)
+        return Path('output.png')

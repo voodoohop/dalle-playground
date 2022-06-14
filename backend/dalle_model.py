@@ -22,6 +22,9 @@ from consts import COND_SCALE, DALLE_COMMIT_ID, DALLE_MODEL_MEGA_FULL, DALLE_MOD
 os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform" # https://github.com/saharmor/dalle-playground/issues/14#issuecomment-1147849318
 os.environ["WANDB_SILENT"] = "true"
 wandb.init(anonymous="must")
+from jax.lib import xla_bridge
+print("BANANA")
+print(xla_bridge.get_backend().platform)
 
 # model inference
 @partial(jax.pmap, axis_name="batch", static_broadcasted_argnums=(3, 4, 5, 6, 7))
