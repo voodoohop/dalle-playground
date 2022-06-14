@@ -22,7 +22,7 @@ class Predictor(BasePredictor):
                 prompt: str = Input(description="Image prompt"),
                 num: int = Input(description="Number of images to generate", default=1),
                 model_size: str = Input(description="Size of the model", default="MINI", choices=["MINI", "MEGA", "MEGA_FULL"])
-                ) -> typing.Iterator[Path]:
+                ) -> typing.List[Path]:
         """Run a single prediction on the model"""
 
         start_time = time.time()
