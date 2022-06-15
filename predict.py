@@ -70,6 +70,24 @@ class Predictor(BasePredictor):
                 num: int = Input(description="Number of images to generate", default=1, ge=0,le=20),
                 model_size: str = Input(description="Size of the model", default="MINI", choices=["MINI", "MEGA", "MEGA_FULL"])
                 ) -> typing.List[Path]:
+        # model inference
+        @partial(jax.pmap, axis_name="batch", static_broadcasted_argnums=(3, 4, 5, 6))
+        def p_generate(
+                tokenized_prompt, key, params, top_k, top_p, temperature, condition_scale
+        ):
+            return self.model.generate(
+                **tokenized_prompt,
+                prng_key=key,
+                params=params,
+                top_k=top_k,
+                top_p=top_p,
+                temperature=temperature,
+                condition_scale=condition_scale,
+            )
+        # decode image
+        @partial(jax.pmap, axis_name="batch")
+        def p_decode(indices, params):
+            return self.vqgan.decode_code(indices, params=params)
         """Run a single prediction on the model"""
 
         print("Tokenizing")
@@ -115,23 +133,7 @@ class Predictor(BasePredictor):
                 yield Path(f'{img_name}.png')
         return Path('output.png')
 
-# model inference
-@partial(jax.pmap, axis_name="batch", static_broadcasted_argnums=(3, 4, 5, 6))
-def p_generate(
-        tokenized_prompt, key, params, top_k, top_p, temperature, condition_scale
-):
-    return model.generate(
-        **tokenized_prompt,
-        prng_key=key,
-        params=params,
-        top_k=top_k,
-        top_p=top_p,
-        temperature=temperature,
-        condition_scale=condition_scale,
-    )
 
 
-# decode image
-@partial(jax.pmap, axis_name="batch")
-def p_decode(indices, params):
-    return vqgan.decode_code(indices, params=params)
+
+
