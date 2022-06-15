@@ -35,7 +35,7 @@ class Predictor(BasePredictor):
 
     def load_dalle(self, model):
         if model == "MINI":
-            DALLE_MODEL = "dalle-mini/dalle-mini/mini-1:v0"
+            DALLE_MODEL = "/artifacts/mini-1:v0"
         elif model == "MEGA":
             DALLE_MODEL = "dalle-mini/dalle-mini/mega-1-fp16:latest"
         elif model == "MEGA_FULL":
