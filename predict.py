@@ -31,26 +31,38 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 dalle_model = None
 class Predictor(BasePredictor):
+
+    model_name = ""
+
+    def load_dalle(self, model):
+        if model == "MINI":
+            DALLE_MODEL = "dalle-mini/dalle-mini/mini-1:v0"
+        elif model == "MEGA":
+            DALLE_MODEL = "dalle-mini/dalle-mini/mega-1-fp16:latest"
+        else:
+            DALLE_MODEL = "dalle-mini/dalle-mini/mini-1:v0"
+        print(f'Loading Dalle Model: {DALLE_MODEL}')
+        # Load dalle-mini
+        model, params = DalleBart.from_pretrained(
+            DALLE_MODEL, revision=None, dtype=jnp.float16, _do_init=False
+        )
+        self.processor = DalleBartProcessor.from_pretrained(DALLE_MODEL, revision=None)
+        print(f'Replicating parameters')
+        params = replicate(params)
+        self.model = model
+        self.params = params
+        self.model_name = model
+
     def setup(self):
         print(os.popen("nvidia-smi").read())
         """Load the model into memory to make running multiple predictions efficient"""
-        # dalle-mega
-        DALLE_MODEL = "dalle-mini/dalle-mini/mega-1-fp16:latest"
-        DALLE_COMMIT_ID = None
-
-        # if the notebook crashes too often you can use dalle-mini instead by uncommenting below line
-        # DALLE_MODEL = "dalle-mini/dalle-mini/mini-1:v0"
 
         # VQGAN model
         VQGAN_REPO = "dalle-mini/vqgan_imagenet_f16_16384"
         VQGAN_COMMIT_ID = "e93a26e7707683d349bf5d5c41c5b0ef69b677a9"
         print(f'Local Devices: {jax.local_device_count()}')
 
-        print(f'Loading Dalle Model: {DALLE_MODEL}')
-        # Load dalle-mini
-        model, params = DalleBart.from_pretrained(
-            DALLE_MODEL, revision=DALLE_COMMIT_ID, dtype=jnp.float16, _do_init=False
-        )
+        self.load_dalle("MINI")
 
         print(f'Loading VQGAN')
         # Load VQGAN
@@ -58,12 +70,8 @@ class Predictor(BasePredictor):
             VQGAN_REPO, revision=VQGAN_COMMIT_ID, _do_init=False
         )
 
-        print(f'Replicating parameters')
-        params = replicate(params)
         vqgan_params = replicate(vqgan_params)
-        self.processor = DalleBartProcessor.from_pretrained(DALLE_MODEL, revision=DALLE_COMMIT_ID)
-        self.model = model
-        self.params = params
+
         self.vqgan_params = vqgan_params
         self.key = jax.random.PRNGKey(seed)
         self.vqgan = vqgan
@@ -75,6 +83,9 @@ class Predictor(BasePredictor):
                 model_size: str = Input(description="Size of the model", default="MINI", choices=["MINI", "MEGA", "MEGA_FULL"])
                 ) -> typing.List[Path]:
         # model inference
+        start_time = time.time()
+        if self.model_name == model_size:
+            self.load_dalle(model_size)
         @partial(jax.pmap, axis_name="batch", static_broadcasted_argnums=(3, 4, 5, 6))
         def p_generate(
                 tokenized_prompt, key, params, top_k, top_p, temperature, condition_scale
@@ -88,6 +99,7 @@ class Predictor(BasePredictor):
                 temperature=temperature,
                 condition_scale=condition_scale,
             )
+
         # decode image
         @partial(jax.pmap, axis_name="batch")
         def p_decode(indices, params):
@@ -135,6 +147,7 @@ class Predictor(BasePredictor):
                 img.save(f'{img_name}.png')
                 print(f'image {i} saved to {img_name}.png')
                 yield Path(f'{img_name}.png')
+            print(f'took {start_time - time.time()}')
         return Path('output.png')
 
 
