@@ -62,7 +62,7 @@ class Predictor(BasePredictor):
         VQGAN_COMMIT_ID = "e93a26e7707683d349bf5d5c41c5b0ef69b677a9"
         print(f'Local Devices: {jax.local_device_count()}')
 
-        self.load_dalle("MINI")
+        # self.load_dalle("MINI")
 
         print(f'Loading VQGAN')
         # Load VQGAN
@@ -117,7 +117,7 @@ class Predictor(BasePredictor):
         gen_top_p = None
         temperature = None
         cond_scale = 10.0
-
+        img_name = "output.png"
         print("Generating images")
         for i in range(max(num // jax.device_count(), 1)):
             # get a new key
@@ -149,7 +149,7 @@ class Predictor(BasePredictor):
                 print(f'image {i} saved to {img_name}.png')
                 yield Path(f'{img_name}.png')
             print(f'took {time.time() - start_time}')
-        return Path('output.png')
+        return Path(f'{img_name}.png')
 
 
 
