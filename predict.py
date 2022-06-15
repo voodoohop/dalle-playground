@@ -1,9 +1,6 @@
 from cog import BasePredictor, Path, Input, File
 import sys
 import uuid
-sys.path.insert(1, './backend')
-from backend.consts import ModelSize
-from backend.dalle_model import DalleModel
 import typing
 import time
 import os
