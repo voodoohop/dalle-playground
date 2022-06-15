@@ -72,7 +72,7 @@ class Predictor(BasePredictor):
         """Run a single prediction on the model"""
 
         print("Tokenizing")
-        tokenized_prompt = self.processor(prompt)
+        tokenized_prompt = self.processor([prompt])
         print("Replicating")
         tokenized_prompt = replicate(tokenized_prompt)
 
