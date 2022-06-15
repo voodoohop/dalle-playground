@@ -19,8 +19,6 @@ build:
     - "pip install wandb"
     - "wandb login --anonymously"
     - "wandb artifact get dalle-mini/dalle-mini/mini-1:v0"
-    - "wandb artifact get dalle-mini/vqgan_imagenet_f16_16384"
-    - "wandb artifact get dalle-mini/vqgan_imagenet_f16_16384"
     - "git config --global --add safe.directory /src"
 predict: "predict.py:Predictor"
 image: "r8.im/nicholascelestin/dalle-mega"
