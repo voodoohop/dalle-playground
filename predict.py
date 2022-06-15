@@ -61,7 +61,7 @@ class Predictor(BasePredictor):
         print(os.popen("nvidia-smi").read())
 
         # VQGAN model
-        VQGAN_REPO = "dalle-mini/vqgan_imagenet_f16_16384"
+        VQGAN_REPO = "/artifacts/vqgan_imagenet_f16_16384"
         VQGAN_COMMIT_ID = "e93a26e7707683d349bf5d5c41c5b0ef69b677a9"
         print(f'Local Devices: {jax.local_device_count()}')
 
