@@ -15,6 +15,11 @@ from flax.training.common_utils import shard_prng_key
 import numpy as np
 from PIL import Image
 from tqdm.notebook import trange
+import wandb
+
+os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform" # https://github.com/saharmor/dalle-playground/issues/14#issuecomment-1147849318
+os.environ["WANDB_SILENT"] = "true"
+wandb.init(anonymous="must")
 
 from dalle_mini import DalleBartProcessor
 
