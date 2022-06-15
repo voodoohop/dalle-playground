@@ -142,10 +142,11 @@ class Predictor(BasePredictor):
             for decoded_img in decoded_images:
                 print(f'saving image {i}')
                 img = Image.fromarray(np.asarray(decoded_img * 255, dtype=np.uint8))
-                img_name = uuid.uuid4()
-                img.save(f'{img_name}.png')
-                print(f'image {i} saved to {img_name}.png')
-                all_images.append(Path(f'{img_name}.png'))
+                img_filename = f'{uuid.uuid4()}.png'
+                img.save(img_filename)
+                print(f'image {i} saved to {img_filename}')
+                all_images.append(Path(img_filename))
+                yield Path(img_filename)
             print(f'took {time.time() - start_time}')
         return all_images
 
