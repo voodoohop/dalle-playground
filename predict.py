@@ -63,7 +63,6 @@ class Predictor(BasePredictor):
         print(f'Local Devices: {jax.local_device_count()}')
 
         self.load_dalle("MINI")
-        self.load_dalle("MEGA")
 
         print(f'Loading VQGAN')
         # Load VQGAN
