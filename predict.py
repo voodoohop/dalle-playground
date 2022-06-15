@@ -35,11 +35,11 @@ class Predictor(BasePredictor):
         print(os.popen("nvidia-smi").read())
         """Load the model into memory to make running multiple predictions efficient"""
         # dalle-mega
-        DALLE_MODEL = "dalle-mini/dalle-mini/mega-1-fp16:latest"  # can be wandb artifact or 🤗 Hub or local folder or google bucket
+        DALLE_MODEL = "dalle-mini/dalle-mini/mega-1-fp16:latest"
         DALLE_COMMIT_ID = None
 
         # if the notebook crashes too often you can use dalle-mini instead by uncommenting below line
-        DALLE_MODEL = "dalle-mini/dalle-mini/mini-1:v0"
+        # DALLE_MODEL = "dalle-mini/dalle-mini/mini-1:v0"
 
         # VQGAN model
         VQGAN_REPO = "dalle-mini/vqgan_imagenet_f16_16384"
