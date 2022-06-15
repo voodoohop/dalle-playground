@@ -117,12 +117,13 @@ class Predictor(BasePredictor):
         img_name = "output.png"
         print("Generating images")
         for i in range(max(num // jax.device_count(), 1)):
-            # get a new key
-            key, subkey = jax.random.split(self.key)
+            # create a random key
+            seed = random.randint(0, 2 ** 32 - 1)
+            key = jax.random.PRNGKey(seed)
             # generate images
             encoded_images = p_generate(
                 tokenized_prompt,
-                shard_prng_key(subkey),
+                shard_prng_key(key),
                 self.params,
                 gen_top_k,
                 gen_top_p,
