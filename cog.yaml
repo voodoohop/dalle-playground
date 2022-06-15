@@ -1,5 +1,4 @@
 build:
-  cuda: "11.4.3"
   gpu: true
   system_packages:
     - "libgl1-mesa-glx"
@@ -12,7 +11,6 @@ build:
     - "Flask-RESTful==0.3.8"
     - "flax==0.5.0"
   run:
-    #   Ideally, these packages would by in python_packages, but I threw them all in run to fix an implicit dependency on torch already being there
     - "git clone https://github.com/borisdayma/dalle-mini.git && cd dalle-mini && pip install -e . && cd .."
     - "git clone https://github.com/patil-suraj/vqgan-jax.git && cd vqgan-jax && pip install -e . && cd .."
     - "git clone https://github.com/huggingface/transformers.git && cd transformers && pip install -e . && cd .."
