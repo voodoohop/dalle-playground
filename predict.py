@@ -43,19 +43,17 @@ class Predictor(BasePredictor):
             DALLE_MODEL = "dalle-mini/dalle-mini/mini-1:v0"
         print(f'Loading Dalle Model: {DALLE_MODEL}')
         # Load dalle-mini
-        model, params = DalleBart.from_pretrained(
+        self.model, self.params = DalleBart.from_pretrained(
             DALLE_MODEL, revision=None, dtype=jnp.float16, _do_init=False
         )
         self.processor = DalleBartProcessor.from_pretrained(DALLE_MODEL, revision=None)
         print(f'Replicating parameters')
-        params = replicate(params)
-        self.model = model
-        self.params = params
+        self.params  = replicate(self.params )
         self.model_name = model
 
     def setup(self):
-        print(os.popen("nvidia-smi").read())
         """Load the model into memory to make running multiple predictions efficient"""
+        print(os.popen("nvidia-smi").read())
 
         # VQGAN model
         VQGAN_REPO = "dalle-mini/vqgan_imagenet_f16_16384"
@@ -66,15 +64,12 @@ class Predictor(BasePredictor):
 
         print(f'Loading VQGAN')
         # Load VQGAN
-        vqgan, vqgan_params = VQModel.from_pretrained(
+        self.vqgan, self.vqgan_params = VQModel.from_pretrained(
             VQGAN_REPO, revision=VQGAN_COMMIT_ID, _do_init=False
         )
 
-        vqgan_params = replicate(vqgan_params)
-
-        self.vqgan_params = vqgan_params
+        self.vqgan_params = replicate(self.vqgan_params)
         self.key = jax.random.PRNGKey(seed)
-        self.vqgan = vqgan
         print(f'Setup complete')
 
     def predict(self,
@@ -87,6 +82,8 @@ class Predictor(BasePredictor):
         start_time = time.time()
         print("loading model")
         self.load_dalle(model_size)
+        print(f'model loaded in {time.time() - start_time}')
+
         @partial(jax.pmap, axis_name="batch", static_broadcasted_argnums=(3, 4, 5, 6))
         def p_generate(
                 tokenized_prompt, key, params, top_k, top_p, temperature, condition_scale
@@ -141,13 +138,14 @@ class Predictor(BasePredictor):
             print(f'decoding image {i}')
             decoded_images = decoded_images.clip(0.0, 1.0).reshape((-1, 256, 256, 3))
             print(f'decoded image {i}')
+            all_images = []
             for decoded_img in decoded_images:
                 print(f'saving image {i}')
                 img = Image.fromarray(np.asarray(decoded_img * 255, dtype=np.uint8))
                 img_name = uuid.uuid4()
                 img.save(f'{img_name}.png')
                 print(f'image {i} saved to {img_name}.png')
-                yield Path(f'{img_name}.png')
+                all_images.append(Path(f'{img_name}.png'))
             print(f'took {time.time() - start_time}')
         return Path(f'{img_name}.png')
 
