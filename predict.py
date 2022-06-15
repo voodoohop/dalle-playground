@@ -82,9 +82,10 @@ class Predictor(BasePredictor):
                 num: int = Input(description="Number of images to generate", default=1, ge=0,le=20),
                 model_size: str = Input(description="Size of the model", default="MINI", choices=["MINI", "MEGA", "MEGA_FULL"])
                 ) -> typing.List[Path]:
+        print(os.popen("nvidia-smi").read())
         # model inference
         start_time = time.time()
-        if self.model_name == model_size:
+        if self.model_name != model_size:
             self.load_dalle(model_size)
         @partial(jax.pmap, axis_name="batch", static_broadcasted_argnums=(3, 4, 5, 6))
         def p_generate(
@@ -131,13 +132,13 @@ class Predictor(BasePredictor):
                 temperature,
                 cond_scale,
             )
-            print(f'encoded image {i}')
+            print(f'encoding image {i}')
             # remove BOS
             encoded_images = encoded_images.sequences[..., 1:]
             print(f'encoded image {i}')
             # decode images
             decoded_images = p_decode(encoded_images, self.vqgan_params)
-            print(f'decoded image {i}')
+            print(f'decoding image {i}')
             decoded_images = decoded_images.clip(0.0, 1.0).reshape((-1, 256, 256, 3))
             print(f'decoded image {i}')
             for decoded_img in decoded_images:
@@ -147,7 +148,7 @@ class Predictor(BasePredictor):
                 img.save(f'{img_name}.png')
                 print(f'image {i} saved to {img_name}.png')
                 yield Path(f'{img_name}.png')
-            print(f'took {start_time - time.time()}')
+            print(f'took {time.time() - start_time}')
         return Path('output.png')
 
 
