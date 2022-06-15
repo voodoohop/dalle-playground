@@ -24,7 +24,7 @@ from dalle_mini import DalleBartProcessor
 import random
 
 seed = random.randint(0, 2**32 - 1)
-key = jax.random.PRNGKey(seed)
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 dalle_model = None
@@ -62,6 +62,7 @@ class Predictor(BasePredictor):
         self.model = model
         self.params = params
         self.vqgan_params = vqgan_params
+        self.key = jax.random.PRNGKey(seed)
         print(f'Setup complete')
 
     def predict(self,
@@ -85,7 +86,7 @@ class Predictor(BasePredictor):
         print("Generating images")
         for i in range(max(num // jax.device_count(), 1)):
             # get a new key
-            key, subkey = jax.random.split(key)
+            key, subkey = jax.random.split(self.key)
             # generate images
             encoded_images = p_generate(
                 tokenized_prompt,
