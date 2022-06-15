@@ -83,7 +83,7 @@ class Predictor(BasePredictor):
         cond_scale = 10.0
 
         print("Generating images")
-        for i in trange(max(num // jax.device_count(), 1)):
+        for i in range(max(num // jax.device_count(), 1)):
             # get a new key
             key, subkey = jax.random.split(key)
             # generate images
