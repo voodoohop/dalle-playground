@@ -30,6 +30,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 dalle_model = None
 class Predictor(BasePredictor):
     def setup(self):
+        print(os.popen("nvidia-smi").read())
         """Load the model into memory to make running multiple predictions efficient"""
         # dalle-mega
         DALLE_MODEL = "dalle-mini/dalle-mini/mega-1-fp16:latest"  # can be wandb artifact or 🤗 Hub or local folder or google bucket
