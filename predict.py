@@ -147,7 +147,7 @@ class Predictor(BasePredictor):
                 print(f'image {i} saved to {img_name}.png')
                 all_images.append(Path(f'{img_name}.png'))
             print(f'took {time.time() - start_time}')
-        return Path(f'{img_name}.png')
+        return all_images
 
 
 
