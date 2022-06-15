@@ -66,6 +66,7 @@ class Predictor(BasePredictor):
         self.params = params
         self.vqgan_params = vqgan_params
         self.key = jax.random.PRNGKey(seed)
+        self.vqgan = vqgan
         print(f'Setup complete')
 
     def predict(self,
