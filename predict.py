@@ -63,6 +63,7 @@ class Predictor(BasePredictor):
         print(f'Local Devices: {jax.local_device_count()}')
 
         self.load_dalle("MINI")
+        self.load_dalle("MEGA")
 
         print(f'Loading VQGAN')
         # Load VQGAN
@@ -85,8 +86,8 @@ class Predictor(BasePredictor):
         print(os.popen("nvidia-smi").read())
         # model inference
         start_time = time.time()
-        if self.model_name != model_size:
-            self.load_dalle(model_size)
+        print("loading model")
+        self.load_dalle(model_size)
         @partial(jax.pmap, axis_name="batch", static_broadcasted_argnums=(3, 4, 5, 6))
         def p_generate(
                 tokenized_prompt, key, params, top_k, top_p, temperature, condition_scale
