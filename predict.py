@@ -18,7 +18,6 @@ from tqdm.notebook import trange
 import wandb
 
 os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform" # https://github.com/saharmor/dalle-playground/issues/14#issuecomment-1147849318
-os.environ["WANDB_SILENT"] = "true"
 wandb.init(anonymous="must")
 
 from dalle_mini import DalleBartProcessor
@@ -39,17 +38,23 @@ class Predictor(BasePredictor):
             DALLE_MODEL = "dalle-mini/dalle-mini/mini-1:v0"
         elif model == "MEGA":
             DALLE_MODEL = "dalle-mini/dalle-mini/mega-1-fp16:latest"
+        elif model == "MEGA_FULL":
+            DALLE_MODEL = "dalle-mini/dalle-mini/mega-1:latest"
         else:
             DALLE_MODEL = "dalle-mini/dalle-mini/mini-1:v0"
+        start_time = time.time()
         print(f'Loading Dalle Model: {DALLE_MODEL}')
+        print(os.popen("nvidia-smi").read())
         # Load dalle-mini
         self.model, self.params = DalleBart.from_pretrained(
             DALLE_MODEL, revision=None, dtype=jnp.float16, _do_init=False
         )
+        print(f'Loading Dalle Processor: {DALLE_MODEL}')
         self.processor = DalleBartProcessor.from_pretrained(DALLE_MODEL, revision=None)
         print(f'Replicating parameters')
         self.params  = replicate(self.params )
         self.model_name = model
+        print(f'model loaded in {time.time() - start_time}')
 
     def setup(self):
         """Load the model into memory to make running multiple predictions efficient"""
@@ -60,7 +65,7 @@ class Predictor(BasePredictor):
         VQGAN_COMMIT_ID = "e93a26e7707683d349bf5d5c41c5b0ef69b677a9"
         print(f'Local Devices: {jax.local_device_count()}')
 
-        # self.load_dalle("MINI")
+        self.load_dalle("MINI")
 
         print(f'Loading VQGAN')
         # Load VQGAN
@@ -74,15 +79,11 @@ class Predictor(BasePredictor):
 
     def predict(self,
                 prompt: str = Input(description="Image prompt"),
-                num: int = Input(description="Number of images to generate", default=1, ge=0,le=20),
-                model_size: str = Input(description="Size of the model", default="MINI", choices=["MINI", "MEGA", "MEGA_FULL"])
+                num: int = Input(description="Number of images to generate", default=1, ge=1,le=20),
+                model_size: str = Input(description="Size of the model", default="MINI", choices=["MINI"])
                 ) -> typing.List[Path]:
         print(os.popen("nvidia-smi").read())
         # model inference
-        start_time = time.time()
-        print("loading model")
-        self.load_dalle(model_size)
-        print(f'model loaded in {time.time() - start_time}')
 
         @partial(jax.pmap, axis_name="batch", static_broadcasted_argnums=(3, 4, 5, 6))
         def p_generate(
@@ -104,9 +105,10 @@ class Predictor(BasePredictor):
             return self.vqgan.decode_code(indices, params=params)
         """Run a single prediction on the model"""
 
-        print("Tokenizing")
+        start_time = time.time()
+        print(f'Tokenizing at {time.time() - start_time}')
         tokenized_prompt = self.processor([prompt])
-        print("Replicating")
+        print(f'Replicating at {time.time() - start_time}')
         tokenized_prompt = replicate(tokenized_prompt)
 
 
@@ -114,8 +116,7 @@ class Predictor(BasePredictor):
         gen_top_p = None
         temperature = None
         cond_scale = 10.0
-        img_name = "output.png"
-        print("Generating images")
+        print(f'Generating images at {time.time() - start_time}')
         for i in range(max(num // jax.device_count(), 1)):
             # create a random key
             seed = random.randint(0, 2 ** 32 - 1)
