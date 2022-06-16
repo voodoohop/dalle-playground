@@ -105,6 +105,7 @@ class Predictor(BasePredictor):
             return self.vqgan.decode_code(indices, params=params)
         """Run a single prediction on the model"""
 
+
         start_time = time.time()
         print(f'Tokenizing at {time.time() - start_time}')
         tokenized_prompt = self.processor([prompt])
