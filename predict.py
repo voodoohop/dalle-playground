@@ -1,29 +1,31 @@
-from cog import BasePredictor, Path, Input, File
-import sys
-import uuid
-import typing
-import time
 import os
+import sys
+import time
+import typing
+import uuid
+from functools import partial
+
 import jax
 import jax.numpy as jnp
-from dalle_mini import DalleBart, DalleBartProcessor
-from vqgan_jax.modeling_flax_vqgan import VQModel
-from transformers import CLIPProcessor, FlaxCLIPModel
-from flax.jax_utils import replicate
-from functools import partial
-from flax.training.common_utils import shard_prng_key
 import numpy as np
+import wandb
+from cog import BasePredictor, File, Input, Path
+from dalle_mini import DalleBart, DalleBartProcessor
+from flax.jax_utils import replicate
+from flax.training.common_utils import shard_prng_key
 from PIL import Image
 from tqdm.notebook import trange
-import wandb
+from transformers import CLIPProcessor, FlaxCLIPModel
+from vqgan_jax.modeling_flax_vqgan import VQModel
 
 os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform" # https://github.com/saharmor/dalle-playground/issues/14#issuecomment-1147849318
 wandb.init(anonymous="must")
 
-from dalle_mini import DalleBartProcessor
-
 import random
 
+from dalle_mini import DalleBartProcessor
+
+print("jax devices", jax.devices())
 seed = random.randint(0, 2**32 - 1)
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -65,7 +67,7 @@ class Predictor(BasePredictor):
         VQGAN_COMMIT_ID = "e93a26e7707683d349bf5d5c41c5b0ef69b677a9"
         print(f'Local Devices: {jax.local_device_count()}')
 
-        self.load_dalle("MINI")
+        self.load_dalle("MEGA")
 
         print(f'Loading VQGAN')
         # Load VQGAN
@@ -80,7 +82,7 @@ class Predictor(BasePredictor):
     def predict(self,
                 prompt: str = Input(description="Image prompt"),
                 num: int = Input(description="Number of images to generate", default=1, ge=1,le=20),
-                model_size: str = Input(description="Size of the model", default="MINI", choices=["MINI"])
+                model_size: str = Input(description="Size of the model", default="MEGA", choices=["MEGA"])
                 ) -> typing.List[Path]:
         print(os.popen("nvidia-smi").read())
         # model inference
