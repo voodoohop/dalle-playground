@@ -147,7 +147,7 @@ class Predictor(BasePredictor):
             for decoded_img in decoded_images:
                 print(f'saving image {i}')
                 img = Image.fromarray(np.asarray(decoded_img * 255, dtype=np.uint8))
-                img_filename = f'{uuid.uuid4()}.png'
+                img_filename = f'/outputs/{uuid.uuid4()}.png'
                 img.save(img_filename)
                 print(f'image {i} saved to {img_filename}')
                 all_images.append(Path(img_filename))
