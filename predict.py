@@ -81,7 +81,7 @@ class Predictor(BasePredictor):
 
     def predict(self,
                 prompt: str = Input(description="Image prompt"),
-                num: int = Input(description="Number of images to generate", default=1, ge=1,le=20),
+                num: int = Input(description="Number of images to generate", default=4, ge=1,le=20),
                 model_size: str = Input(description="Size of the model", default="MEGA", choices=["MEGA"])
                 ) -> typing.List[Path]:
         print(os.popen("nvidia-smi").read())
