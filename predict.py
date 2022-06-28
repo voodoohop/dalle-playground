@@ -17,6 +17,8 @@ from PIL import Image
 from tqdm.notebook import trange
 from transformers import CLIPProcessor, FlaxCLIPModel
 from vqgan_jax.modeling_flax_vqgan import VQModel
+from swinir_predict import Predictor as SwinIRPredictor
+import shutil
 
 os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform" # https://github.com/saharmor/dalle-playground/issues/14#issuecomment-1147849318
 wandb.init(anonymous="must")
@@ -31,6 +33,22 @@ seed = random.randint(0, 2**32 - 1)
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 dalle_model = None
+
+from glob import glob
+
+from tqdm import tqdm
+
+images = glob(f"{output_path}/*.jpg") + glob(f"{output_path}/*.png") + glob(f"{output_path}/*.jpeg")
+images = list(sorted(images))
+
+tmp_output = "/tmp/sr_output"
+
+for image_file in tqdm(images):
+    print("Super RES", image_file)
+    path = p.predict(image_file)
+    !cp "{path}" "{out_file}"
+    
+
 class Predictor(BasePredictor):
 
     model_name = ""
@@ -78,6 +96,10 @@ class Predictor(BasePredictor):
         self.vqgan_params = replicate(self.vqgan_params)
         self.key = jax.random.PRNGKey(seed)
         print(f'Setup complete')
+
+        self.swinIRPredictor = SwinIRPredictor()
+        self.swinIRPredictor.setup()
+
 
     def predict(self,
                 prompt: str = Input(description="Image prompt"),
@@ -150,8 +172,17 @@ class Predictor(BasePredictor):
                 img_filename = f'/outputs/{uuid.uuid4()}.png'
                 img.save(img_filename)
                 print(f'image {i} saved to {img_filename}')
+                
+                # Super Resolution
+                print(f'Super Resolution of image {img_filename}')
+                superres_img_filename = self.swinIRPredictor.predict(img_filename)
+                
+                # Copy super res image to replace original image
+                shutil.copy(superres_img_filename, img_filename)
+
                 all_images.append(Path(img_filename))
-                yield Path(img_filename)
+                
+                #yield Path(img_filename)
             print(f'took {time.time() - start_time}')
         return all_images
 

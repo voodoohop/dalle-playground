@@ -4,12 +4,14 @@ build:
   system_packages:
     - "libgl1-mesa-glx"
     - "libglib2.0-0"
+    = "imagemagick"
 #    - "libcudnn8=8.1.0.77-1+cuda11.2"
   python_version: "3.8"
   python_packages:
     - "Flask==2.1.0"
     - "Flask-Cors==3.0.9"
     - "Flask-RESTful==0.3.8"
+    - "timm==0.4.12"
   #  - "flax==0.5.1"
   run:
     - "pip install --upgrade pip"
@@ -17,13 +19,22 @@ build:
     - "git clone https://github.com/borisdayma/dalle-mini.git && cd dalle-mini && pip install -e . && cd .."
     - "git clone https://github.com/patil-suraj/vqgan-jax.git && cd vqgan-jax && pip install -e . && cd .."
     - "git clone https://github.com/huggingface/transformers.git && cd transformers && pip install -e . && cd .."
-    # - "pip install --upgrade jaxlib"
+
+    # SwinIR setup
+    - git clone https://github.com/voodoohop/SwinIR
+    - mv -v /src/SwinIR/predict.py /src/SwinIR/swinir_predict.py
+    - cp -rv /src/SwinIR/* /src
+    - mkdir -p /src/experiments/pretrained_models
+    - wget -c "https://github.com/JingyunLiang/SwinIR/releases/download/v0.0/003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x4_GAN.pth" -P /src/experiments/pretrained_models
+
+    # Download model
     - "pip install wandb"
     - "wandb login --anonymously"
     - "wandb artifact get dalle-mini/dalle-mini/mega-1-fp16:latest"
+
     - "git config --global --add safe.directory /src"
 predict: "predict.py:Predictor"
-image: "r8.im/nicholascelestin/dalle-mega"
+image: "r8.im/pollinations/dalle-mega"
 
 
 
