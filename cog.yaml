@@ -4,8 +4,6 @@ build:
   system_packages:
     - "libgl1-mesa-glx"
     - "libglib2.0-0"
-    = "imagemagick"
-#    - "libcudnn8=8.1.0.77-1+cuda11.2"
   python_version: "3.8"
   python_packages:
     - "Flask==2.1.0"
