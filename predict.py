@@ -34,19 +34,6 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 dalle_model = None
 
-from glob import glob
-
-from tqdm import tqdm
-
-images = glob(f"{output_path}/*.jpg") + glob(f"{output_path}/*.png") + glob(f"{output_path}/*.jpeg")
-images = list(sorted(images))
-
-tmp_output = "/tmp/sr_output"
-
-for image_file in tqdm(images):
-    print("Super RES", image_file)
-    path = p.predict(image_file)
-    !cp "{path}" "{out_file}"
     
 
 class Predictor(BasePredictor):
@@ -177,11 +164,12 @@ class Predictor(BasePredictor):
                 print(f'Super Resolution of image {img_filename}')
                 superres_img_filename = self.swinIRPredictor.predict(img_filename)
                 
+                print("Super Resolution filename", superres_img_filename)
                 # Copy super res image to replace original image
                 shutil.copy(superres_img_filename, img_filename)
 
-                all_images.append(Path(img_filename))
-                
+                #all_images.append(Path(img_filename))
+                #print("appended ")
                 #yield Path(img_filename)
             print(f'took {time.time() - start_time}')
         return all_images

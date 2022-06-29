@@ -10,6 +10,7 @@ build:
     - "Flask-Cors==3.0.9"
     - "Flask-RESTful==0.3.8"
     - "timm==0.4.12"
+    - "opencv-python==4.4.0.46"
   #  - "flax==0.5.1"
   run:
     - "pip install --upgrade pip"
@@ -20,8 +21,10 @@ build:
 
     # SwinIR setup
     - git clone https://github.com/voodoohop/SwinIR
-    - mv -v /src/SwinIR/predict.py /src/SwinIR/swinir_predict.py
-    - cp -rv /src/SwinIR/* /src
+    - ls -l 
+    - mv -v SwinIR/predict.py SwinIR/swinir_predict.py
+    - mkdir -p /src
+    - cp -rv SwinIR/* /src
     - mkdir -p /src/experiments/pretrained_models
     - wget -c "https://github.com/JingyunLiang/SwinIR/releases/download/v0.0/003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x4_GAN.pth" -P /src/experiments/pretrained_models
 
