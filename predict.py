@@ -89,11 +89,12 @@ class Predictor(BasePredictor):
 
 
     def predict(self,
-                prompt: str = Input(description="Image prompt"),
+                Prompt: str = Input(description="Image prompt"),
                 num: int = Input(description="Number of images to generate", default=4, ge=1,le=20),
                 model_size: str = Input(description="Size of the model", default="MEGA", choices=["MEGA"])
                 ) -> typing.List[Path]:
         print(os.popen("nvidia-smi").read())
+        prompt = Prompt
         # model inference
 
         @partial(jax.pmap, axis_name="batch", static_broadcasted_argnums=(3, 4, 5, 6))
